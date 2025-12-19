@@ -1,10 +1,10 @@
 
 
-# Run and deploy your AI Studio app
+# Website for phishing emails competitive ranked.
 
 This contains everything you need to run your app locally.
 
-View your app in AI Studio: https://ai.studio/apps/drive/1gh-UbDdKsCVxRizh8g8cnCXxL6Xat-vL
+This is just a template for future website. Do not take it seriously.
 
 ## Run Locally
 
