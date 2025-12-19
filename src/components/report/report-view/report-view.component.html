@@ -1,0 +1,168 @@
+@if (report(); as r) {
+  <div class="bg-secondary rounded-lg border border-border p-6 md:p-8 shadow-xl">
+    <!-- Header -->
+    <div class="border-b border-border pb-6 mb-6">
+      <div class="flex flex-col md:flex-row justify-between md:items-center gap-4 md:gap-6">
+        <div>
+          <h1 class="text-3xl md:text-4xl font-bold text-text-primary">Analysis Report</h1>
+          <p class="text-text-secondary mt-1">Submitted by {{ r.user.username }} on {{ r.timestamp | date:'longDate' }}</p>
+        </div>
+        <div class="flex items-center gap-4">
+          @if (isLoggedIn()) {
+            <button (click)="toggleLike()" 
+                    class="flex items-center gap-2 px-4 py-2 rounded-lg border transition-colors"
+                    [class.text-danger]="currentUserHasLiked()"
+                    [class.border-danger]="currentUserHasLiked()"
+                    [class.hover:bg-danger/10]="currentUserHasLiked()"
+                    [class.text-text-secondary]="!currentUserHasLiked()"
+                    [class.border-border]="!currentUserHasLiked()"
+                    [class.hover:border-danger/50]="!currentUserHasLiked()"
+                    [class.hover:text-danger]="!currentUserHasLiked()">
+              <i class="fas fa-heart"></i>
+              <span class="font-semibold">{{ r.likes.length }}</span>
+            </button>
+          }
+          <div class="text-center p-3 rounded-lg border" [class.border-danger]="r.analysis.confidenceScore > 0.8" [class.border-warning]="r.analysis.confidenceScore > 0.5 && r.analysis.confidenceScore <= 0.8" [class.border-success]="r.analysis.confidenceScore <= 0.5">
+            <p class="text-lg font-semibold" [class]="getRiskColorClass(r.analysis.confidenceScore)">{{ getRiskText(r.analysis.confidenceScore) }}</p>
+            <p class="text-sm text-text-secondary">Confidence: {{ r.analysis.confidenceScore | percent }}</p>
+          </div>
+        </div>
+      </div>
+      <!-- Owner Actions -->
+      @if (isOwner()) {
+        <div class="mt-4 pt-4 border-t border-border/50 flex items-center gap-2">
+            <p class="text-sm text-text-secondary font-semibold mr-2">Owner Actions:</p>
+            @if (justPublished()) {
+                <button class="px-3 py-1.5 rounded-md text-sm bg-success/20 text-success border border-success/50 cursor-default">
+                    <i class="fas fa-check mr-2"></i>Published!
+                </button>
+            } @else if (justUnpublished()) {
+                 <button class="px-3 py-1.5 rounded-md text-sm bg-warning/20 text-warning border border-warning/50 cursor-default">
+                    <i class="fas fa-check mr-2"></i>Now Private
+                </button>
+            } @else if (r.isPublic) {
+                <button (click)="unpublishReport()" class="px-3 py-1.5 rounded-md text-sm bg-primary hover:bg-warning/20 hover:text-warning border border-border hover:border-warning/50 transition-colors">
+                    <i class="fas fa-download mr-2"></i>Make Private
+                </button>
+            } @else {
+                <button (click)="publishReport()" class="px-3 py-1.5 rounded-md text-sm bg-primary hover:bg-accent/20 hover:text-accent border border-border hover:border-accent/50 transition-colors">
+                    <i class="fas fa-upload mr-2"></i>Publish to Feed
+                </button>
+            }
+            <div class="flex-grow"></div>
+            <button (click)="deleteReport()" class="px-3 py-1.5 rounded-md text-sm bg-primary hover:bg-danger/20 hover:text-danger border border-border hover:border-danger/50 transition-colors">
+                <i class="fas fa-trash-alt mr-2"></i>Delete Report
+            </button>
+        </div>
+      }
+    </div>
+
+    <!-- Recommended Action -->
+    <div class="mb-8">
+       <h2 class="text-2xl font-bold text-text-primary mb-4"><i class="fas fa-exclamation-circle mr-2"></i>Recommended Action</h2>
+       <div class="flex items-center space-x-4 p-4 rounded-lg border" [class]="getActionColorClass(r.analysis.confidenceScore)">
+          <div class="text-3xl"><i class="fas" [class]="getActionIcon(r.analysis.recommendedAction)"></i></div>
+          <p class="text-lg font-semibold">{{ r.analysis.recommendedAction }}</p>
+       </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="grid grid-cols-1 lg:grid-cols-5 gap-8">
+      <!-- Left: AI Analysis -->
+      <div class="lg:col-span-3">
+        <h2 class="text-2xl font-bold text-accent mb-4"><i class="fas fa-robot mr-2"></i>Gemini AI Verdict</h2>
+        <div class="bg-primary/50 p-4 rounded-lg border border-border mb-6">
+          <p class="text-text-primary leading-relaxed text-base">{{ r.analysis.summary }}</p>
+        </div>
+        
+        <h3 class="text-xl font-semibold text-text-primary mb-4">Detected Red Flags</h3>
+        <div class="space-y-5 mb-8">
+          @for (flag of r.analysis.redFlags; track flag.category) {
+            <div class="flex items-start space-x-4 p-4 bg-primary/50 rounded-lg border border-border">
+              <div class="text-xl pt-1 text-warning">
+                 <i class="fas" [class]="getFlagIcon(flag.category)"></i>
+              </div>
+              <div>
+                <h4 class="font-bold text-text-primary">{{ flag.category }}</h4>
+                <p class="text-text-secondary">{{ flag.description }}</p>
+              </div>
+            </div>
+          } @empty {
+            <div class="flex items-center space-x-3 p-4 bg-success/10 rounded-lg border border-success/30 text-success">
+              <i class="fas fa-check-circle"></i>
+              <p>No significant red flags were detected.</p>
+            </div>
+          }
+        </div>
+
+         <h2 class="text-2xl font-bold text-text-primary mb-4"><i class="fas fa-graduation-cap mr-2"></i>Learning Point</h2>
+         <div class="flex items-start space-x-4 p-4 rounded-lg bg-sky-500/10 border border-sky-500/30 text-sky-300">
+            <div class="text-3xl pt-1"><i class="fas fa-lightbulb"></i></div>
+            <p class="text-base">{{ r.analysis.educationalTakeaway }}</p>
+         </div>
+
+      </div>
+
+      <!-- Right: Original Email -->
+      <div class="lg:col-span-2">
+        <h2 class="text-2xl font-bold text-text-secondary mb-4"><i class="fas fa-envelope mr-2"></i>Original Email</h2>
+        <div class="bg-primary p-4 rounded-lg border border-border max-h-[600px] overflow-y-auto">
+          <pre class="text-sm text-text-secondary whitespace-pre-wrap font-mono leading-relaxed">{{ r.originalEmail }}</pre>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Comments Section -->
+    <div class="mt-12 pt-8 border-t border-border">
+      <h2 class="text-3xl font-bold text-text-primary mb-6">Community Discussion ({{ comments().length }})</h2>
+      
+      <!-- New Comment Form -->
+      @if (isLoggedIn()) {
+        <div class="mb-8">
+          <textarea 
+            [ngModel]="newCommentContent()" 
+            (ngModelChange)="newCommentContent.set($event)"
+            rows="3" 
+            placeholder="Add your analysis or ask a question..." 
+            class="w-full bg-primary border border-border rounded-md py-2 px-3 text-text-primary focus:outline-none focus:ring-2 focus:ring-accent"></textarea>
+          <button (click)="postComment()" [disabled]="!newCommentContent().trim()"
+                  class="mt-2 bg-accent hover:bg-sky-500 text-white font-bold py-2 px-4 rounded-md transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
+            Post Comment
+          </button>
+        </div>
+      } @else {
+        <div class="text-center p-4 mb-8 bg-primary/50 border border-border rounded-lg">
+          <p class="text-text-secondary"><a routerLink="/login" class="text-accent hover:underline font-semibold">Log in</a> to join the discussion.</p>
+        </div>
+      }
+
+      <!-- Comments List -->
+      <div class="space-y-6">
+        @for (comment of comments(); track comment.id) {
+          <div class="flex items-start space-x-4">
+            <div class="w-10 h-10 rounded-full bg-primary border border-border flex items-center justify-center font-bold text-accent shrink-0">
+              {{ comment.user.username[0].toUpperCase() }}
+            </div>
+            <div class="flex-1 bg-primary/50 p-4 rounded-lg border border-border">
+              <div class="flex items-center justify-between mb-2">
+                <p class="font-bold text-text-primary">{{ comment.user.username }}</p>
+                <p class="text-xs text-text-secondary">{{ comment.timestamp | date:'short' }}</p>
+              </div>
+              <p class="text-text-primary whitespace-pre-wrap">{{ comment.content }}</p>
+            </div>
+          </div>
+        } @empty {
+          <div class="text-center py-8">
+            <p class="text-text-secondary">No comments yet. Be the first to share your thoughts!</p>
+          </div>
+        }
+      </div>
+    </div>
+
+  </div>
+} @else {
+  <div class="text-center py-20">
+    <h1 class="text-2xl text-text-secondary">Report not found.</h1>
+    <a routerLink="/global-feed" class="text-accent hover:underline mt-4 inline-block">Return to Global Feed</a>
+  </div>
+}

@@ -1,0 +1,109 @@
+@if(currentUser(); as user) {
+<div class="flex flex-col lg:flex-row gap-8">
+  <!-- Left Sidebar: User Info -->
+  <aside class="lg:w-1/4">
+    <div class="bg-secondary p-6 rounded-lg border border-border sticky top-24">
+      <div class="flex flex-col items-center text-center">
+        <div class="w-24 h-24 rounded-full bg-primary border-2 border-accent flex items-center justify-center mb-4">
+          <i class="fas fa-user text-4xl text-accent"></i>
+        </div>
+        <h1 class="text-2xl font-bold text-text-primary">{{ user.username }}</h1>
+        <p class="text-text-secondary">{{ user.email }}</p>
+      </div>
+      <div class="mt-6 border-t border-border pt-6 space-y-3">
+        <h3 class="px-3 text-xs text-text-secondary/70 font-semibold uppercase tracking-wider">Account Actions</h3>
+        <button (click)="logout()" class="w-full text-left flex items-center gap-3 px-3 py-2 rounded-md text-text-secondary hover:bg-primary hover:text-text-primary transition-colors">
+          <i class="fas fa-sign-out-alt w-4 text-center"></i>
+          <span>Logout</span>
+        </button>
+        <button (click)="deleteAccount()" class="w-full text-left flex items-center gap-3 px-3 py-2 rounded-md text-text-secondary hover:bg-danger/20 hover:text-danger transition-colors">
+          <i class="fas fa-trash-alt w-4 text-center"></i>
+          <span>Delete Account</span>
+        </button>
+      </div>
+    </div>
+  </aside>
+
+  <!-- Right Content: Reports -->
+  <div class="lg:w-3/4">
+    <!-- Tabs -->
+    <div class="border-b border-border mb-6">
+      <nav class="flex space-x-6" aria-label="Tabs">
+        <button (click)="setActiveTab('my-reports')"
+                [class.text-accent]="activeTab() === 'my-reports'"
+                [class.border-accent]="activeTab() === 'my-reports'"
+                [class.text-text-secondary]="activeTab() !== 'my-reports'"
+                [class.border-transparent]="activeTab() !== 'my-reports'"
+                class="px-1 pb-3 font-semibold border-b-2 hover:text-accent transition-colors">
+          My Reports ({{ myReports().length }})
+        </button>
+        <button (click)="setActiveTab('archived-reports')"
+                [class.text-accent]="activeTab() === 'archived-reports'"
+                [class.border-accent]="activeTab() === 'archived-reports'"
+                [class.text-text-secondary]="activeTab() !== 'archived-reports'"
+                [class.border-transparent]="activeTab() !== 'archived-reports'"
+                class="px-1 pb-3 font-semibold border-b-2 hover:text-accent transition-colors">
+          Archived Reports ({{ archivedReports().length }})
+        </button>
+      </nav>
+    </div>
+
+    <!-- Tab Content -->
+    <div class="bg-primary/50 border border-border rounded-xl">
+      @if (activeTab() === 'my-reports') {
+        <div>
+          @for (report of myReports(); track report.id) {
+            <app-email-card
+              [report]="report"
+              [showDelete]="true"
+              [showPublish]="!report.isPublic"
+              [showUnpublish]="report.isPublic"
+              [isJustPublished]="justPublishedReportId() === report.id"
+              [isJustUnpublished]="justUnpublishedReportId() === report.id"
+              [isLoggedIn]="true"
+              [isArchived]="reportService.isReportArchived(report.id)()"
+              (delete)="deleteReport($event)"
+              (toggleArchive)="toggleArchive($event)"
+              (like)="toggleLike($event)"
+              (publish)="publishReport($event)"
+              (unpublish)="unpublishReport($event)">
+            </app-email-card>
+          } @empty {
+            <div class="text-center py-16">
+              <i class="fas fa-inbox text-5xl text-text-secondary mb-4"></i>
+              <p class="text-text-secondary">You haven't submitted any reports yet.</p>
+              <a routerLink="/new-report" class="mt-4 inline-block bg-accent hover:bg-sky-500 text-white font-bold py-2 px-4 rounded-md transition-colors">
+                Submit Your First Report
+              </a>
+            </div>
+          }
+        </div>
+      }
+
+      @if (activeTab() === 'archived-reports') {
+        <div>
+          @for (report of archivedReports(); track report.id) {
+            <app-email-card
+              [report]="report"
+              [isLoggedIn]="true"
+              [isArchived]="true"
+              [showDelete]="true"
+              (toggleArchive)="toggleArchive($event)"
+              (delete)="deleteReport($event)"
+              (like)="toggleLike($event)">
+            </app-email-card>
+          } @empty {
+            <div class="text-center py-16">
+              <i class="fas fa-bookmark text-5xl text-text-secondary mb-4"></i>
+              <p class="text-text-secondary">You haven't archived any reports yet.</p>
+              <a routerLink="/global-feed" class="mt-4 inline-block bg-accent hover:bg-sky-500 text-white font-bold py-2 px-4 rounded-md transition-colors">
+                Browse the Global Feed
+              </a>
+            </div>
+          }
+        </div>
+      }
+    </div>
+  </div>
+</div>
+}

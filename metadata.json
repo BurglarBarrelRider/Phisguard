@@ -1,0 +1,5 @@
+{
+  "name": "PhishGuard AI",
+  "description": "An AI-powered anti-phishing application that analyzes emails for threats. It features a global feed of reports, a personal feed for user submissions, and detailed, email-style analysis reports using Google's Gemini API.",
+  "requestFramePermissions": []
+}

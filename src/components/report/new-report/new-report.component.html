@@ -1,0 +1,70 @@
+<div class="max-w-4xl mx-auto">
+  <div class="bg-secondary rounded-lg border border-border p-8 shadow-xl">
+    <div class="text-center mb-6">
+      <h1 class="text-4xl font-bold text-text-primary">Analyze a Suspicious Email</h1>
+      <p class="text-text-secondary mt-2">Provide a subject or context, then paste the full email content below for an instant analysis.</p>
+    </div>
+
+    @if (!isLoading()) {
+      <form #reportForm="ngForm" (ngSubmit)="analyzeEmail()">
+        <div class="mb-4">
+          <label for="subject" class="block text-text-secondary text-sm font-bold mb-2">Context / Subject</label>
+          <input
+            type="text"
+            id="subject"
+            name="subject"
+            [ngModel]="subject()"
+            (ngModelChange)="subject.set($event)"
+            class="w-full bg-primary border border-border rounded-md py-2 px-3 text-text-primary focus:outline-none focus:ring-2 focus:ring-accent"
+            placeholder="e.g., Suspicious password reset email"
+          />
+        </div>
+        
+        <div>
+          <label for="emailContent" class="block text-text-secondary text-sm font-bold mb-2">Full Email Content</label>
+          <textarea
+            id="emailContent"
+            name="emailContent"
+            [ngModel]="emailContent()"
+            (ngModelChange)="emailContent.set($event)"
+            rows="12"
+            class="w-full bg-primary border border-border rounded-md py-4 px-4 text-text-primary focus:outline-none focus:ring-2 focus:ring-accent font-mono text-sm"
+            placeholder="From: suspicious@sender.com&#10;Subject: Urgent Action Required!&#10;&#10;Dear Valued Customer,..."
+            required
+          ></textarea>
+        </div>
+
+        <div class="mt-4 text-left">
+          <label class="flex items-center cursor-pointer">
+            <input
+              type="checkbox"
+              name="isPublic"
+              [ngModel]="isPublic()"
+              (ngModelChange)="isPublic.set($event)"
+              class="h-5 w-5 rounded bg-primary border-border text-accent focus:ring-accent focus:ring-offset-primary"
+            />
+            <span class="ml-3 text-text-secondary">Make this report public in the Global Feed</span>
+          </label>
+          <p class="ml-8 text-xs text-text-secondary/70">Your username will be visible on public reports.</p>
+        </div>
+
+        @if (error()) {
+          <div class="mt-4 bg-danger/20 text-danger border border-danger/50 rounded-md p-3 text-center">
+            <p>{{ error() }}</p>
+          </div>
+        }
+
+        <div class="mt-6 text-center">
+          <button type="submit" [disabled]="!emailContent().trim()"
+                  class="bg-accent hover:bg-sky-500 text-white font-bold py-3 px-8 rounded-md transition-colors text-lg disabled:bg-gray-500 disabled:cursor-not-allowed">
+            <i class="fas fa-search mr-2"></i>Analyze Now
+          </button>
+        </div>
+      </form>
+    } @else {
+      <div class="flex flex-col items-center justify-center py-20">
+        <app-spinner message="Analyzing with Gemini AI..."></app-spinner>
+      </div>
+    }
+  </div>
+</div>

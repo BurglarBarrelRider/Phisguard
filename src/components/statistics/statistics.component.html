@@ -1,0 +1,63 @@
+<div class="max-w-7xl mx-auto py-8">
+  <!-- Header -->
+  <div class="text-center mb-12 md:mb-16">
+    <h1 class="text-4xl md:text-5xl font-bold text-text-primary">Phishing & Social Attack Insights</h1>
+    <p class="text-text-secondary mt-4 text-lg max-w-3xl mx-auto">
+      Knowledge is your first line of defense. Understand the scale of the threat and learn to recognize the tactics used by cybercriminals.
+    </p>
+  </div>
+
+  <!-- Key Statistics Section -->
+  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-16">
+    @for (stat of stats; track stat.description) {
+      <div class="bg-secondary p-6 rounded-lg border border-border text-center">
+        <div class="text-accent text-4xl mb-4"><i class="fas" [class]="stat.icon"></i></div>
+        <p class="text-4xl font-extrabold text-text-primary">{{ stat.value }}</p>
+        <p class="text-text-secondary mt-2">{{ stat.description }}</p>
+        <p class="text-xs text-text-secondary/70 mt-3">Source: {{ stat.source }}</p>
+      </div>
+    }
+  </div>
+
+  <!-- Common Attack Vectors Section -->
+  <div class="mb-16">
+    <div class="text-center mb-10">
+        <h2 class="text-3xl md:text-4xl font-bold text-text-primary">Common Attack Vectors</h2>
+        <p class="text-text-secondary mt-3 text-lg max-w-3xl mx-auto">
+          Attackers use various sophisticated methods to trick their victims. Here are some of the most common techniques.
+        </p>
+    </div>
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        @for (vector of vectors; track vector.name) {
+            <div class="bg-secondary p-8 rounded-xl border border-border flex flex-col">
+                <div class="flex items-center mb-4">
+                    <i class="fas text-accent text-3xl mr-4" [class]="vector.icon"></i>
+                    <h3 class="text-2xl font-bold text-text-primary">{{ vector.name }}</h3>
+                </div>
+                <p class="text-text-secondary flex-grow">{{ vector.description }}</p>
+            </div>
+        }
+    </div>
+  </div>
+
+  <!-- How to Protect Yourself Section -->
+  <div>
+    <div class="text-center mb-10">
+        <h2 class="text-3xl md:text-4xl font-bold text-text-primary">How to Protect Yourself</h2>
+        <p class="text-text-secondary mt-3 text-lg max-w-3xl mx-auto">
+          Adopting secure habits can significantly reduce your risk of falling victim to a phishing attack.
+        </p>
+    </div>
+    <div class="max-w-4xl mx-auto bg-secondary p-8 rounded-xl border border-border">
+        <ul class="space-y-5">
+            @for (tip of tips; track tip.tip) {
+                <li class="flex items-start">
+                    <div class="text-success text-xl mr-4 pt-1"><i class="fas" [class]="tip.icon"></i></div>
+                    <span class="text-text-primary text-lg">{{ tip.tip }}</span>
+                </li>
+            }
+        </ul>
+    </div>
+  </div>
+
+</div>
